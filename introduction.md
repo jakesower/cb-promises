@@ -38,7 +38,7 @@ Callbacks are typically given as the last argument to async functions. In the ab
 
 ```javascript
 function promiseExample() {
-  const httpRequestP = makeRequest('https://example.com/something);
+  const httpRequestP = makeRequest('https://example.com/something');
 
   httpRequestP.then(function (response) {
     console.log('everything went fine');

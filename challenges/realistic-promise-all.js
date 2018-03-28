@@ -40,3 +40,8 @@ assertEqual(
   promiseAll([babomb, bomb]),
   Promise.reject('^__^')
 );
+
+assertEqual(
+  promiseAll([Promise.resolve('hi'), bomb]),
+  Promise.reject('x_x')
+)

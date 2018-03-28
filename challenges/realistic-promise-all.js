@@ -3,7 +3,9 @@ const { fetchWeather, fetchTwins } = require('../lib/fetchers');
 
 /**
  * This is an actual implementation of Promise.all. It must handle both success
- * and failure cases.
+ * and failure cases. If one or more promises fail, the entire promise fails.
+ * The contents of the rejected promise are the same as the contents of the
+ * first promise that rejected.
  */
 
 function promiseAll(promises) {
@@ -26,14 +28,15 @@ assertEqual(
 );
 
 const bomb = Promise.reject('x_x');
+const babomb = Promise.reject('^__^');
 const bombArray = weatherPs.concat([bomb]);
-
-assertEqual(
-  promiseAll([bomb]),
-  Promise.reject('x_x')
-);
 
 assertEqual(
   promiseAll(bombArray),
   Promise.reject('x_x')
+);
+
+assertEqual(
+  promiseAll([babomb, bomb]),
+  Promise.reject('^__^')
 );

@@ -22,10 +22,12 @@ function wrapCallback(url) {
 
 assertEqual(
   wrapCallback(`${webRoot}/weather?location=Munich, Germany`),
-  Promise.resolve('{"temperature":62}')
+  Promise.resolve('{"temperature":62}'),
+  'Callback Wrapper 1'
 );
 
 assertEqual(
   wrapCallback(`example.com/lol`).catch(() => Promise.reject('something happened')),
-  Promise.reject('something happened')
+  Promise.reject('something happened'),
+  'Callback Wrapper 2'
 );

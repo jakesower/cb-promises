@@ -20,7 +20,8 @@ const { fetchWeather, fetchTwins } = require('../lib/fetchers');
 
 assertEqual(
   fetchWeather('Salt Lake City, Utah, USA'),
-  Promise.resolve(36)
+  Promise.resolve(36),
+  'Fetch Weather'
 );
 assertEqual(
   fetchTwins('Dull, Scotland'),
@@ -28,7 +29,8 @@ assertEqual(
     'Dull, Scotland',
     'Boring, Oregon, USA',
     'Bland, Australia',
-  ])
+  ]),
+  'Fetch Twins'
 );
 
 /**
@@ -48,7 +50,8 @@ function twoCities(city1, city2) {
 
 assertEqual(
   twoCities('Reston, Virginia, USA', 'Taipei, Taiwan'),
-  Promise.resolve([76, 63])
+  Promise.resolve([76, 63]),
+  'Two Cities'
 );
 
 
@@ -65,10 +68,12 @@ function coldestTwin(city) {
 
 assertEqual(
   coldestTwin('Washington, DC, USA'),
-  Promise.resolve('Darak, Senegal')
+  Promise.resolve('Darak, Senegal'),
+  'Coldest Twin 1'
 );
 
 assertEqual(
   coldestTwin('Tabriz, Iran'),
-  Promise.resolve('Oruro, Bolivia')
+  Promise.resolve('Oruro, Bolivia'),
+  'Coldest Twin 2'
 );

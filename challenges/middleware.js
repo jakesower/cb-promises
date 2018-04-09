@@ -281,13 +281,13 @@ function buggyAction(req) {
     formatResponse
   ]);
 
-  const res = authorizedStack(findUser, { userId: 3 });
+  const res = authorizedStack(findUser)({ userId: 3 });
   assertEqual(
     res,
     { status: 403, body: JSON.stringify("user not authorized!") }
   );
 
-  const res2 = authorizedStack(findUser, { cookies: { authToken: 'okay' }, userId: 3 })
+  const res2 = authorizedStack(findUser, { cookies: { authToken: 'okay' }, userId: 3 });
   assertEqual(
     res2,
     { status: '200', body: JSON.stringify({ id: req.userId, name: "Jules" }) }
@@ -414,7 +414,7 @@ function makeAsyncMiddleware(mwFuncs) {
     { status: 403, body: JSON.stringify("user not authorized!") }
   );
 
-  const res2 = authorizedStack(findUser, { cookies: { authToken: 'okay' }, userId: 3 })
+  const res2 = authorizedStack(findUser, { cookies: { authToken: 'okay' }, userId: 3 });
   assertEqual(
     res2,
     { status: '200', body: JSON.stringify({ id: req.userId, name: "Jules" }) }

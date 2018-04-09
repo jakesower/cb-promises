@@ -14,7 +14,8 @@ function promiseAll(promises) {
 
 assertEqual(
   promiseAll([Promise.resolve(1), Promise.resolve(2)]),
-  Promise.resolve([1, 2])
+  Promise.resolve([1, 2]),
+  'Promise All 1'
 );
 
 // The following code is an excellent of example of how promises behave like
@@ -24,7 +25,8 @@ const weatherPs = cities.map(fetchWeather);
 
 assertEqual(
   promiseAll(weatherPs),
-  Promise.resolve([53, 40, 54])
+  Promise.resolve([53, 40, 54]),
+  'Promise All 2'
 );
 
 const bomb = Promise.reject('x_x');
@@ -33,15 +35,18 @@ const bombArray = weatherPs.concat([bomb]);
 
 assertEqual(
   promiseAll(bombArray),
-  Promise.reject('x_x')
+  Promise.reject('x_x'),
+  'Promise All 3'
 );
 
 assertEqual(
   promiseAll([babomb, bomb]),
-  Promise.reject('^__^')
+  Promise.reject('^__^'),
+  'Promise All 4'
 );
 
 assertEqual(
   promiseAll([Promise.resolve('hi'), bomb]),
-  Promise.reject('x_x')
-)
+  Promise.reject('x_x'),
+  'Promise All 5'
+);

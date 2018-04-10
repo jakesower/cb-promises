@@ -102,6 +102,7 @@ Cons
 1. Since it uses promises internally, the lack of support in some libraries is the same as with promises.
 1. Not widely supported, so it requires a compiler like babel.
 1. Obscures the nature of the promises that it uses.
+1. Code can be read ambiguously in some cases.
 
 ## Why Promises
 

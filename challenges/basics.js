@@ -75,7 +75,7 @@ function compareAgesWithErrors(name) {
 }
 
 assertEqual(
-  compareAgesWithErrors('Liskov'),
+  compareAgesWithErrors('Eich'),
   Promise.resolve('Barbara Liskov'),
   'Compare Ages with Errors 1'
 );

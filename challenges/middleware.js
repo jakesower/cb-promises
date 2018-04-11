@@ -111,7 +111,7 @@ function compose(funcs) {
 
 // Testing apparatus
 const people = [
-  { name: 'Zoe', likes: ['apples', 'bananas'] },
+  { name: 'Brett', likes: ['apples', 'bananas'] },
   { name: 'Yousef', likes: ['beets'] },
   { name: 'Williana', likes: ['cherries', 'beets'] }
 ];

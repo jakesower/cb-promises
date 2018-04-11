@@ -25,12 +25,15 @@ assertEqual(
  * Get the name of a scientist, find their friend and return the full name of
  * the friend. Here's an example of what a scientist looks like:
  *
- * {
+ * `fetchScientist` takes a name, e.g., 'Liskov' and returns a promise of a
+ * scientist (as defined above).
+ *
+ * Example: fetchScientist('Liskov') -> Promise.resolve({
  *   name: 'Liskov',
  *   fullName: 'Barbara Liskov',
  *   dob: new Date('1939-11-07'),
  *   friend: 'Eich',
- * }
+ * })
  */
 
 function getFriend(name) {

@@ -410,8 +410,9 @@ function makeAsyncMiddleware(mwFuncs) {
           if (result instanceof Promise) {
             result.then(resolve);
             result.catch(reject);
+          } else {
+            resolve(result);
           }
-          resolve(result);
         } catch (err) {
           reject(err);
         }

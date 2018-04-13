@@ -12,7 +12,7 @@ const webRoot = 'https://7lvxk1opef.execute-api.us-east-1.amazonaws.com/dev';
  * Success: callback(null, result)
  * Failure: callback(err)
  *
- * The goal of the challenge is to create a functions that wraps
+ * The goal of the challenge is to create a function that wraps
  * `callbackFetch` and returns a promise that resolves or rejects correctly.
  */
 

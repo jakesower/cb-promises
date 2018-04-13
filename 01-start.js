@@ -56,7 +56,7 @@ assertEqual(
  * - Calling the function `extractTemperature`, which takes in a string and
  *   returns a number, resulted in returning a promise of a number, rather than
  *   just the number itself, when called in the context of `then`.
- * - The `then` method has two all important qualities.
+ * - The `then` method has two all-important qualities.
  *
  *   1. It is the ONLY way of accessing the value contained within the promise
  *      (unless the promise is rejected, but let's ignore that for now)
@@ -73,7 +73,7 @@ assertEqual(
  * we want within the function we pass to `then`. `assertEqual` in the above
  * example had to deal with the async quality of the promise, but it managed to
  * output the checkmark saying the test passed. Likewise, HTTP responses can be
- * send when using promises on the server. Likewise, DOM updates can be made
+ * sent when using promises on the server. Likewise, DOM updates can be made
  * within a function that gets passed to `then`.
  *
  * Also, we are not doomed to dealing with the async contagion when we write

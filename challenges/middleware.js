@@ -95,17 +95,20 @@ const assertEqual = require('../lib/assert-equal');
  *
  */
 
+// utils
+
+function isString(s) {
+  return typeof s === 'string';
+}
+
 const id = x => x;  // the identity function, this may come in handy. ;)
 
 function composePair(g, f) {
-  // take two functions, g and f, and compose them into a single function that
-  // first calls f, then g on the given input
-  // this could be useful as either a learning tool, or as part of the solution
+  return val => g(f(val));
 }
 
 function compose(funcs) {
-  // this is what you must implement; it takes a list of functions and composes
-  // them from right to left
+  return funcs.reduce(composePair, id);
 }
 
 
@@ -154,7 +157,8 @@ const transforms = [
 
 assertEqual(
   compose(transforms)(10),
-  33
+  33,
+  'Compose'
 );
 
 
@@ -166,12 +170,13 @@ assertEqual(
  */
 
 function pipe(funcs) {
-
+  return compose(funcs.reverse());
 }
 
 assertEqual(
   pipe(transforms)(10),
-  28
+  28,
+  'Pipe'
 );
 
 
@@ -186,6 +191,10 @@ assertEqual(
  * function. `req` can be anything (it stands for "request"). `next` is a
  * function that invokes the next layer. Hopefully the test cases will make it
  * clear what's going on.
+ *
+ * HINT: Disabling the error catching middleware can make bugs easier to spot.
+ * HINT: Disabling the logify middleware can clean up the test output without
+ *       changing the validity of the tests.
  */
 
 // logs both the request and the response
@@ -244,11 +253,20 @@ function errorCatcher(req, next) {
 // okay, we've got some middleware functions; now to assemble them
 
 // take a list of middleware functions and return a new function that accepts
-// two arguments: a function to run inside the middleware and the initial value
-// of `req`. each function in the middleware stack should be called, followed
-// by the wrapped function.
+// one argument: a function to run inside the middleware; this should return a
+// function that takes the initial value of `req`. each function in the
+// middleware stack should be called, followed by the wrapped function.
 function makeMiddleware(mwFuncs) {
-  // implement this
+  const wrapMW = function (mwStack, mwFn) {
+    // create the outmost layer of the stack, which is function that takes its
+    // `req` as its argument and calls the mwFn with that `req` and the inner
+    // parts of the stack as its `next` function
+    return req => mwFn(req, mwStack);
+  }
+
+  return function (wrappedFn) {
+    return mwFuncs.reverse().reduce(wrapMW, wrappedFn);
+  }
 }
 
 
@@ -284,31 +302,36 @@ function buggyAction(req) {
   const res = authorizedStack(findUser)({ userId: 3 });
   assertEqual(
     res,
-    { status: 403, body: JSON.stringify("user not authorized!") }
+    { status: 403, body: JSON.stringify("user not authorized!") },
+    'Middleware 1'
   );
 
-  const res2 = authorizedStack(findUser, { cookies: { authToken: 'okay' }, userId: 3 });
+  const res2 = authorizedStack(findUser)({ cookies: { authToken: 'okay' }, userId: 3 });
   assertEqual(
     res2,
-    { status: '200', body: JSON.stringify({ id: req.userId, name: "Jules" }) }
+    { status: '200', body: JSON.stringify({ id: 3, name: "Jules" }) },
+    'Middleware 2'
   );
 
-  const res3 = authorizedStack(buggyAction, { userId: 3 });
+  const res3 = authorizedStack(buggyAction)({ userId: 3 });
   assertEqual(
     res3,
-    { status: 403, body: JSON.stringify("user not authorized!") }
+    { status: 403, body: JSON.stringify("user not authorized!") },
+    'Middleware 3'
   );
 
-  const res4 = authorizedStack(buggyAction, { cookies: { authToken: 'okay' }, userId: 3 });
+  const res4 = authorizedStack(buggyAction)({ cookies: { authToken: 'okay' }, userId: 3 });
   assertEqual(
     res4,
-    { status: '500', body: '🙀' }
+    { status: '500', body: '🙀' },
+    'Middleware 4'
   );
 
-  const res5 = publicStack(findUser, { userId: 3 });
+  const res5 = publicStack(findUser)({ userId: 3 });
   assertEqual(
     res5,
-    { status: '200', body: JSON.stringify({ id: req.userId, name: "Jules" }) }
+    { status: '200', body: JSON.stringify({ id: 3, name: "Jules" }) },
+    'Middleware 5'
   );
 
 }());
@@ -350,19 +373,6 @@ function formatResponseAsync(req, next) {
   });
 }
 
-// takes a JS object, checks for a valid auth token (we fake this part) and
-// only calls the next layer if the user is authorized
-function authorizeAsync(req, next) {
-  // pretend we're going to a database here
-  const authedP = Promise.resolve(req.cookies && req.cookies.authToken && req.cookies.authToken === 'okay');
-  const err = {
-    status: 403,
-    body: JSON.stringify("user not authorized!")
-  };
-
-  return authedP.then(authed => authed ? next(req) : err);
-}
-
 function errorCatcherAsync(req, next) {
   const err500 = {
     status: '500',
@@ -370,18 +380,17 @@ function errorCatcherAsync(req, next) {
   };
 
   try {
-    return next(req).catch(() => err500);
+    const res = next(req);
+    return res.catch((err) => {
+      return err500;
+    });
   } catch (ignore) {
     return err500;
   }
 }
 
 function findUserAsync(req) {
-  if (req.userId) {
-    return Promise.resolve({ id: req.userId, name: "Jules" });
-  }
-
-  return Promise.resolve("user not found!");
+  return Promise.resolve(findUser(req));
 }
 
 function buggyAction(req) {
@@ -390,7 +399,33 @@ function buggyAction(req) {
 
 
 function makeAsyncMiddleware(mwFuncs) {
-  // implement this
+  // this is the key function -- it ensures that functions consistently return
+  // promises
+  const promisify = function (fn) {
+    return function (...args) {
+      return new Promise(function (resolve, reject) {
+        try {
+          const result = fn(...args);
+
+          if (result instanceof Promise) {
+            result.then(resolve);
+            result.catch(reject);
+          }
+          resolve(result);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+  }
+
+  const wrapMW = function (mwStack, mwFn) {
+    return promisify(req => mwFn(req, mwStack));
+  }
+
+  return function (wrappedFn) {
+    return mwFuncs.reverse().reduce(wrapMW, promisify(wrappedFn));
+  }
 }
 
 
@@ -399,43 +434,55 @@ function makeAsyncMiddleware(mwFuncs) {
     logifyAsync,
     errorCatcherAsync,
     formatResponseAsync,
-    authorizeAsync
+    authorize, // note that the sync version works fine
   ]);
 
   const publicStack = makeAsyncMiddleware([
     logifyAsync,
     errorCatcherAsync,
-    formatResponseAsync
+    formatResponseAsync,
   ]);
 
-  const res = authorizedStack(findUser, { userId: 3 });
+  const res = authorizedStack(findUserAsync)({ userId: 3 });
   assertEqual(
     res,
-    { status: 403, body: JSON.stringify("user not authorized!") }
+    Promise.resolve({ status: 403, body: JSON.stringify("user not authorized!") }),
+    'Async Middleware 1'
   );
 
-  const res2 = authorizedStack(findUser, { cookies: { authToken: 'okay' }, userId: 3 });
+  const res2 = authorizedStack(findUserAsync)({ cookies: { authToken: 'okay' }, userId: 3 });
   assertEqual(
     res2,
-    { status: '200', body: JSON.stringify({ id: req.userId, name: "Jules" }) }
+    Promise.resolve({ status: '200', body: JSON.stringify({ id: 3, name: "Jules" }) }),
+    'Async Middleware 2'
   );
 
-  const res3 = authorizedStack(buggyAction, { userId: 3 });
+  const res3 = authorizedStack(buggyAction)({ userId: 3 });
   assertEqual(
     res3,
-    { status: 403, body: JSON.stringify("user not authorized!") }
+    Promise.resolve({ status: 403, body: JSON.stringify("user not authorized!") }),
+    'Async Middleware 3'
   );
 
-  const res4 = authorizedStack(buggyAction, { cookies: { authToken: 'okay' }, userId: 3 });
+  const res4 = authorizedStack(buggyAction)({ cookies: { authToken: 'okay' }, userId: 3 });
   assertEqual(
     res4,
-    { status: '500', body: '🙀' }
+    Promise.resolve({ status: '500', body: '🙀' }),
+    'Async Middleware 4'
   );
 
-  const res5 = publicStack(findUser, { userId: 3 });
+  const res5 = publicStack(findUserAsync)({ userId: 3 });
   assertEqual(
     res5,
-    { status: '200', body: JSON.stringify({ id: req.userId, name: "Jules" }) }
+    Promise.resolve({ status: '200', body: JSON.stringify({ id: 3, name: "Jules" }) }),
+    'Async Middleware 5'
   );
 
+  // this one wraps a synchronous function
+  const res6 = authorizedStack(findUser)({ cookies: { authToken: 'okay' }, userId: 3 });
+  assertEqual(
+    res2,
+    Promise.resolve({ status: '200', body: JSON.stringify({ id: 3, name: "Jules" }) }),
+    'Async Middleware 6'
+  );
 }());

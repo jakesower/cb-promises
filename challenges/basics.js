@@ -10,7 +10,7 @@ const { fetchWeather, fetchScientist } = require('../lib/fetchers');
 const fToC = t => (t - 32) * (5/9);
 
 function celciusWeather(city) {
-
+  return fetchWeather(city).then(fToC);
 }
 
 assertEqual(
@@ -37,7 +37,9 @@ assertEqual(
  */
 
 function getFriend(name) {
-
+  return fetchScientist(name)
+    .then(sci => fetchScientist(sci.friend))
+    .then(friend => friend.fullName);
 }
 
 assertEqual(
@@ -55,7 +57,13 @@ assertEqual(
  */
 
 function compareAges(name) {
+  const sciP = fetchScientist(name);
+  const friendP = sciP.then(sci => fetchScientist(sci.friend));
 
+  return Promise.all([sciP, friendP])
+    .then(function ([sci, friend]) {
+      return sci.dob < friend.dob ? sci.fullName : friend.fullName
+    });
 }
 
 assertEqual(
@@ -74,7 +82,15 @@ assertEqual(
  */
 
 function compareAgesWithErrors(name) {
+  const sciP = fetchScientist(name);
+  const friendP = sciP
+    .then(sci => fetchScientist(sci.friend))
+    .catch(() => sciP);
 
+  return Promise.all([sciP, friendP])
+    .then(function ([sci, friend]) {
+      return sci.dob < friend.dob ? sci.fullName : friend.fullName
+    });
 }
 
 assertEqual(

@@ -14,8 +14,8 @@ const { fetchWeather, fetchTwins } = require('../lib/fetchers');
  * The module uses two lambdas to provide data for the exercises. Please feel
  * free to explore the URLs:
  *
- * Weather: https://7lvxk1opef.execute-api.us-east-1.amazonaws.com/dev/weather?location=<location>
- * Twin Towns: https://7lvxk1opef.execute-api.us-east-1.amazonaws.com/dev/twins?city=<city>
+ * Weather: https://l5q8d1uj4m.execute-api.us-east-1.amazonaws.com/dev/weather?location=<location>
+ * Twin Towns: https://l5q8d1uj4m.execute-api.us-east-1.amazonaws.com/dev/twins?city=<city>
  */
 
 assertEqual(

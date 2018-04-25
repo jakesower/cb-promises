@@ -14,7 +14,7 @@ const fetch = require('./lib/fetch');
  * Example 1: A weather service
  */
 
-const webRoot = 'https://7lvxk1opef.execute-api.us-east-1.amazonaws.com/dev';
+const webRoot = 'https://l5q8d1uj4m.execute-api.us-east-1.amazonaws.com/dev';
 
 // This will go out to a lambda I've written to retrieve weather data. It uses
 // fake data, but means that we don't need to get API keys and such from a real

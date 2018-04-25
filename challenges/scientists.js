@@ -1,26 +1,8 @@
 const assertEqual = require('../lib/assert-equal');
-const { fetchWeather, fetchScientist } = require('../lib/fetchers');
+const { fetchScientist } = require('../lib/fetchers');
 
 /**
- * Challenge 1: Convert to Celcius
- *
- * Take the weather from a city and convert it to celcius.
- */
-
-const fToC = t => (t - 32) * (5/9);
-
-function celciusWeather(city) {
-  return fetchWeather(city).then(fToC);
-}
-
-assertEqual(
-  celciusWeather('San Francisco, CA'),
-  Promise.resolve(5),
-  'Celcius Weather'
-);
-
-/**
- * Challenge 2: Get Friend
+ * Challenge 1: Get Friend
  *
  * Get the name of a scientist, find their friend and return the full name of
  * the friend. Here's an example of what a scientist looks like:
@@ -50,7 +32,7 @@ assertEqual(
 
 
 /**
- * Challenge 3: Compare Ages
+ * Challenge 2: Compare Ages
  *
  * Get the name of a scientist, find their friend and return the full name of
  * the one who is older. Here's an example of what a scientist looks like:
@@ -74,7 +56,7 @@ assertEqual(
 
 
 /**
- * Challenge 4: Compare Ages with Errors
+ * Challenge 3: Compare Ages with Errors
  *
  * Implement the above challenge again, but this time it must handle the case
  * of scientists without friends. In the case that a scientist does not have a

@@ -9,25 +9,7 @@ const { fetchWeather, fetchTwins } = require('../lib/fetchers');
  */
 
 function promiseAll(promises) {
-  let resolved = [];
-  let remaining = promises.length;
 
-  function resolvePromise(prom, resolve, reject, idx) {
-    prom.then(function (val) {
-      resolved[idx] = val;
-      remaining = remaining - 1;
-      if (remaining === 0) {
-        resolve(resolved);
-      }
-    });
-    prom.catch(reject);
-  }
-
-  return new Promise(function(resolve, reject) {
-    promises.forEach((prom, idx) =>
-      resolvePromise(prom, resolve, reject, idx)
-    );
-  });
 }
 
 assertEqual(

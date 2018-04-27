@@ -108,7 +108,7 @@ function composePair(g, f) {
 }
 
 function compose(funcs) {
-
+  return funcs.reduce(composePair, id);
 }
 
 
@@ -170,7 +170,7 @@ assertEqual(
  */
 
 function pipe(funcs) {
-
+  return compose(funcs.reverse());
 }
 
 assertEqual(
@@ -257,7 +257,16 @@ function errorCatcher(req, next) {
 // function that takes the initial value of `req`. each function in the
 // middleware stack should be called, followed by the wrapped function.
 function makeMiddleware(mwFuncs) {
+  const wrapMW = function (mwStack, mwFn) {
+    // create the outmost layer of the stack, which is function that takes its
+    // `req` as its argument and calls the mwFn with that `req` and the inner
+    // parts of the stack as its `next` function
+    return req => mwFn(req, mwStack);
+  }
 
+  return function (wrappedFn) {
+    return mwFuncs.reverse().reduce(wrapMW, wrappedFn);
+  }
 }
 
 
@@ -390,7 +399,33 @@ function buggyAction(req) {
 
 
 function makeAsyncMiddleware(mwFuncs) {
+  // this is the key function -- it ensures that functions consistently return
+  // promises
+  const promisify = function (fn) {
+    return function (...args) {
+      return new Promise(function (resolve, reject) {
+        try {
+          const result = fn(...args);
 
+          if (result instanceof Promise) {
+            result.then(resolve);
+            result.catch(reject);
+          }
+          resolve(result);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+  }
+
+  const wrapMW = function (mwStack, mwFn) {
+    return promisify(req => mwFn(req, mwStack));
+  }
+
+  return function (wrappedFn) {
+    return mwFuncs.reverse().reduce(wrapMW, promisify(wrappedFn));
+  }
 }
 
 

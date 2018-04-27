@@ -17,7 +17,15 @@ const webRoot = 'https://l5q8d1uj4m.execute-api.us-east-1.amazonaws.com/dev';
  */
 
 function wrapCallback(url) {
-
+  return new Promise(function (res, rej) {
+    callbackFetch(url, function (err, data) {
+      if (err) {
+        rej(err);
+      } else {
+        res(data);
+      }
+    });
+  });
 }
 
 assertEqual(

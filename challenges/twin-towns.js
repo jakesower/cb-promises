@@ -63,7 +63,18 @@ assertEqual(
  */
 
 function coldestTwin(city) {
+  function makePairP(name) {
+    return fetchWeather(name).then(w => [name, w]);
+  }
 
+  function findColdestPair(pairs) {
+    return pairs.reduce((p1, p2) => p1[1] < p2[1] ? p1 : p2, pairs[0]);
+  }
+
+  const twinsP = fetchTwins(city);
+  const pairsP = twinsP.then(twins => Promise.all(twins.map(makePairP)));
+
+  return pairsP.then(findColdestPair).then(pair => pair[0]);
 }
 
 assertEqual(

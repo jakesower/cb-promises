@@ -19,7 +19,9 @@ const { fetchScientist } = require('../lib/fetchers');
  */
 
 function getFriend(name) {
-
+  return fetchScientist(name)
+    .then(sci => fetchScientist(sci.friend))
+    .then(friend => friend.fullName);
 }
 
 assertEqual(
@@ -37,7 +39,13 @@ assertEqual(
  */
 
 function compareAges(name) {
+  const sciP = fetchScientist(name);
+  const friendP = sciP.then(sci => fetchScientist(sci.friend));
 
+  return Promise.all([sciP, friendP])
+    .then(function ([sci, friend]) {
+      return sci.dob < friend.dob ? sci.fullName : friend.fullName
+    });
 }
 
 assertEqual(
@@ -56,7 +64,15 @@ assertEqual(
  */
 
 function compareAgesWithErrors(name) {
+  const sciP = fetchScientist(name);
+  const friendP = sciP
+    .then(sci => fetchScientist(sci.friend))
+    .catch(() => sciP);
 
+  return Promise.all([sciP, friendP])
+    .then(function ([sci, friend]) {
+      return sci.dob < friend.dob ? sci.fullName : friend.fullName
+    });
 }
 
 assertEqual(
